@@ -61,16 +61,21 @@ class SculptAlphasManagerPreferences(AddonPreferences):
 #--------------------------------------------------------------------------------------
 # F U N C T I O N A L I T I E S
 #--------------------------------------------------------------------------------------
+def check_extension(filename):
+    return any([filename.lower().endswith(ext) for ext in [".jpeg", ".jpg", ".png", ".tif"]])
+
+def category_folders(lib_path):
+    length = len(lib_path)
+    folders = []
+    for dirpath, _, filenames in os.walk(lib_path, followlinks=True):
+        if any(check_extension(filename) for filename in filenames):
+            folders.append(dirpath[length:].lstrip(os.sep))
+    return folders
 
 # CATEGORIES PREVIEWS FUNCTION
 def preview_sub_folders_categories(self, context):
     lib_path = context.preferences.addons[__name__].preferences.sculpt_alphas_library
-        
-    list_of_category_folders = []
-    for folder in os.listdir(lib_path):
-        if os.path.isdir(os.path.join(lib_path, folder)):
-            list_of_category_folders.append(folder)
-
+    list_of_category_folders = category_folders(lib_path)
     return [(name, name, "") for name in list_of_category_folders]
 
 # CATEGORY ITEMS PREVIEWS FUNCTION
@@ -93,7 +98,7 @@ def preview_items_in_folders(self, context):
     if directory and os.path.exists(directory):
         image_paths = []
         for fn in os.listdir(directory):
-            if fn.lower().endswith(".jpeg") or fn.lower().endswith(".jpg") or fn.lower().endswith(".png") or fn.lower().endswith(".tif"):
+            if check_extension(fn):
                 image_paths.append(fn)
 
         for i, name in enumerate(image_paths):
@@ -229,3 +234,4 @@ def unregister():
 
 if __name__ == "__main__":
     register()
+
